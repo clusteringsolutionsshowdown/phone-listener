@@ -20,7 +20,7 @@ class Server(phoneManager: ActorRef) extends Actor with LogSupport {
     parameters("lat".as[Int], "lon".as[Int]) { (lat, lon) =>
       info(s"phone connected at location ($lat, $lon)")
       phoneManager ! PhoneConnected(lat, lon)
-      complete("Connection request received")
+      complete("Connection request received\n")
     }
   } ~ get {
     // curl http://0.0.0.0:8080     --> simple health check
