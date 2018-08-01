@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorSystem, Props}
 import io.ticofab.phone.listener.Server
 import io.ticofab.phone.phone.Manager
 import wvlet.log.LogFormatter.SourceCodeLogFormatter
-import wvlet.log.{LogFormatter, LogSupport, Logger}
+import wvlet.log.{LogSupport, Logger}
 
 object PhoneApp extends App with LogSupport {
 
@@ -13,8 +13,9 @@ object PhoneApp extends App with LogSupport {
 
     override def receive = Actor.emptyBehavior
 
+    // start actors
     val manager = context.actorOf(Props[Manager])
-    val server = context.actorOf(Props(new Server(manager)))
+    context.actorOf(Props(new Server(manager)))
   }
 
   Logger.setDefaultFormatter(SourceCodeLogFormatter)

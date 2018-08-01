@@ -7,8 +7,6 @@ import akka.stream.ActorMaterializer
 import io.ticofab.phone.phone.Manager.PhoneConnected
 import wvlet.log.LogSupport
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 class Server(phoneManager: ActorRef) extends Actor with LogSupport {
   override def receive = Actor.emptyBehavior
 
@@ -17,13 +15,14 @@ class Server(phoneManager: ActorRef) extends Actor with LogSupport {
   // http server to control the rate per second of inputs
   implicit val am = ActorMaterializer()
   val routes = path("connect") {
+    // curl http://0.0.0.0:8080/connect?lat=1&lon=2
     parameters("lat".as[Int], "lon".as[Int]) { (lat, lon) =>
       info(s"phone connected at location ($lat, $lon)")
       phoneManager ! PhoneConnected(lat, lon)
       complete("Connection request received\n")
     }
   } ~ get {
-    // curl http://0.0.0.0:8080     --> simple health check
+    // curl http://0.0.0.0:8080
     complete("Phone App Listener is alive!\n")
   }
 
