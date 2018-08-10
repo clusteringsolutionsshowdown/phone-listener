@@ -5,7 +5,3 @@ scalaVersion := "2.12.6"
 
 lazy val phoneCommon = RootProject(file("../phone-common"))
 val main = Project(id = "phone-app", base = file(".")).dependsOn(phoneCommon)
-
-libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-http" % "10.1.3"
-)
