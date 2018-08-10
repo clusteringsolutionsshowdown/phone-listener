@@ -33,19 +33,22 @@ class Supervisor extends Actor with LogSupport {
   var nodes: Map[ActorRef, Int] = Map()
 
   def receive = {
-    case RegisterNode => nodes = nodes + (sender -> 0)
+    case RegisterNode =>
+      debug(s"node joined: $sender")
+      nodes = nodes + (sender -> 0)
 
     case dc: DeviceConnected =>
       // forward it to node with minimum number of connected phones
       val chosenNode = nodes.minBy(_._2)._1
+      debug(s"who to send this device to? loads are $nodes. Sending it to ${chosenNode.path.name}")
       (chosenNode ? dc) (3.seconds)
         .mapTo[DeviceActorReady]
-        .map { case DeviceActorReady(deviceActor, itsLocation, sourceRef) =>
+        .map { case DeviceActorReady(manager, deviceActor, itsLocation, sourceRef) =>
 
           // some side effecting stuff
           debug(s"device actor is ready for location $itsLocation: $deviceActor")
-          val updatedLoad = nodes.getOrElse(sender, 0) + 1
-          nodes = nodes + (sender -> updatedLoad)
+          val updatedLoad = nodes.getOrElse(manager, 0) + 1
+          nodes = nodes + (manager -> updatedLoad)
 
           // TODO: perform load check and maybe trigger scaling or downscaling
 
