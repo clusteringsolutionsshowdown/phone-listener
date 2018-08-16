@@ -39,8 +39,13 @@ class Supervisor extends Actor with LogSupport {
 
     case dc: DeviceConnected =>
       // forward it to node with minimum number of connected phones
-      val chosenNode = nodes.minBy(_._2)._1
-      debug(s"who to send this device to? loads are $nodes. Sending it to ${chosenNode.path.name}")
+      val chosenNode = {
+        val nodesForLog = nodes.map { case (k, v) => (k.path.name, v) }
+        val nodeForDevice = nodes.minBy(_._2)._1
+        debug(s"who to send this device to? loads are $nodesForLog. Sending it to ${nodeForDevice.path.name}")
+        nodeForDevice
+      }
+
       (chosenNode ? dc) (3.seconds)
         .mapTo[DeviceActorReady]
         .map { case DeviceActorReady(manager, deviceActor, itsLocation, sourceRef) =>
@@ -49,6 +54,7 @@ class Supervisor extends Actor with LogSupport {
           debug(s"device actor is ready for location $itsLocation: $deviceActor")
           val updatedLoad = nodes.getOrElse(manager, 0) + 1
           nodes = nodes + (manager -> updatedLoad)
+
 
           // TODO: perform load check and maybe trigger scaling or downscaling
 
@@ -65,7 +71,7 @@ class Supervisor extends Actor with LogSupport {
 
             val pubSrc = b.add(sourceRef.map(TextMessage(_)))
 
-            textMsgFlow ~> Sink.foreach[String](deviceActor ! _)
+            textMsgFlow ~> Sink.foreach[String](deviceActor ! MessageForMatchedDevice(_))
             FlowShape(textMsgFlow.in, pubSrc.out)
           })
         }
