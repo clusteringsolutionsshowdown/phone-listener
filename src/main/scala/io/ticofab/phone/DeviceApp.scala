@@ -2,6 +2,8 @@ package io.ticofab.phone
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
+import akka.management.AkkaManagement
+import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.pattern.{ask, pipe}
 import akka.stream.scaladsl.GraphDSL.Implicits._
 import akka.stream.scaladsl.{Flow, GraphDSL, Sink}
@@ -20,6 +22,10 @@ object DeviceApp extends App with LogSupport {
   Logger.setDefaultLogLevel(LogLevel.DEBUG)
   info("phone app starting")
   val as = ActorSystem("showdown")
+
+  AkkaManagement(as).start()
+  ClusterBootstrap(as).start()
+
   as.actorOf(Props[Supervisor], "supervisor")
 }
 
