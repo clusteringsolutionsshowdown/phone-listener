@@ -14,11 +14,11 @@ spec:
         metadata:
             labels:
                 app: phone-app
-                actorSystemName: phone-cluster
+                actorSystemName: showdown
         spec:
             containers:
             -   name: phone-app
-                image: clusteringsolutionsshowdown/phone-app:6
+                image: clusteringsolutionsshowdown/phone-app:11
                 livenessProbe:
                     tcpSocket:
                         port: 8558
